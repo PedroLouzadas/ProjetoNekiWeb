@@ -26,8 +26,6 @@ export const Login = () => {
 
   const {usuarioCON, setUsuarioCON} = useContext(ContextLoginUser);
 
-
-
   const [status, setStatus] = useState({
     type: "",
     mensagem: "",
@@ -54,6 +52,7 @@ export const Login = () => {
   }
 
   function VerificaLogin() {
+
     login.map((login) => {
       if (login.login === dados.login && login.password === dados.password) {
        setUsuarioCON(login.id)
@@ -70,7 +69,6 @@ export const Login = () => {
       });
     });
   }
-
 
 
 
@@ -97,7 +95,7 @@ export const Login = () => {
           <Formulario>
             <div>
               <h8 style={{ fontWeight: "bold", color: "#858597" }}>
-                Seu Email
+                Seu Username
               </h8>
               <input
                 className="input"

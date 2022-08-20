@@ -4,13 +4,14 @@ import Form from "react-bootstrap/Form";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
-import { CardHome } from "../../componentes/cardHome.jsx";
+import { CardUserSkills } from "../../componentes/UserSkills/cardUserSkills.jsx";
 import Modal from "react-bootstrap/Modal";
 import api from "../../service/api.js";
 import Dropdown from "react-bootstrap/Dropdown";
 import { ContextLoginUser } from "../../context/ContextLogin/index.jsx";
+import { CardHome } from "../../componentes/cardHome.jsx";
 
-export const Home = () => {
+export const UserSkills = () => {
   const [section, setSection] = useState(0);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -22,7 +23,9 @@ export const Home = () => {
   const [nivelConhecimento, setNivelConhecimento] = useState("");
   const [imagem, setImagem] = useState("");
   const [skills, setSkills] = useState([]);
+  const [userSkills, setUserSkills] = useState([]);
   const [render, setRender] = useState(false);
+  const [render2, setRender2] = useState(false);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const handleCloseModal = () => setShowModal(false);
@@ -30,45 +33,101 @@ export const Home = () => {
   const handleCloseModal3 = () => setShowModal3(false);
   const handleShowModal3 = () => setShowModal3(true);
   const [showModal3, setShowModal3] = useState(false);
-  const {usuarioCON, setUsuarioCON} = useContext(ContextLoginUser);
+  const [listUserSK, setListUserSK] = useState([]);
+  const { usuarioCON, setUsuarioCON } = useContext(ContextLoginUser);
   const handleCloseModal5 = () => setShowModal5(false);
   const handleShowModal5 = () => setShowModal5(true);
   const [showModal5, setShowModal5] = useState(false);
+  const [skillsIDDD, setSkillsIDDD] = useState([]);
+  const [listaSkillsUser, setListaSkillksUser] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  function Direcionamento() {
-    return navigate("/userskills");
-  }
+  const ListSkills = async () => {
+    while (listaSkillsUser.length > 0) {
+      listaSkillsUser.pop();
+    }
+    userSkills.map((item) => {
+      console.log("UsuarioCOM88: " + usuarioCON);
+      if (item.user === usuarioCON) {
+        //console.log("ItemSkill: " + item.skill)
+        skills.map((skill) => {
+          if (item.skill === skill.id) {
+            console.log("ALOUU");
+            //setListaSkillksUser([...listaSkillsUser, skill]);
+            listaSkillsUser.push(skill);
+          }
+        });
+      }
+    });
+    listaSkillsUser.map((skill) => {
+      console.log("Lista de Skills777: " + skill.id);
+      console.log("Skill User:" + listaSkillsUser);
+    });
+    setLoading(false);
+    setRender(!render);
+    //console.log("ListaSkillUser: " + listaSkillsUser)
+  };
 
   const today = new Date();
 
   function formatDate(date, format) {
-	//
+    //
   }
 
-  formatDate(today, 'aa/mm/dd');
+  formatDate(today, "aa/mm/dd");
 
   useEffect(() => {
     ReceberSkills();
-    console.log("Usuario" + usuarioCON)
+    //ReceberUserSkills();
+    // console.log("Usuario" + usuarioCON);
+    // console.log("Skills" + skills);
+    // console.log("UserSkills" + userSkills.id);
   }, [render]);
 
-  function ReceberSkills() {
+  const ReceberSkills = async () => {
     api
       .get(`/api/skills`)
       .then((result) => {
         setSkills(result.data);
+        console.log("TESTE20");
+        ReceberUserSkills();
         // SetDropDown();
       })
       .catch((error) => {
         console.log("Erro ao carregar " + JSON.stringify(error));
       });
-  }
+  };
+
+  // const ReceberSkillsID = async () => {
+  //   api
+  //     .get(`/api/skills${pulicacao.skills}`)
+  //     .then((result) => {
+  //       setSkillsIDDD(result.data);
+  //       // SetDropDown();
+  //     })
+  //     .catch((error) => {
+  //       console.log("Erro ao carregar " + JSON.stringify(error));
+  //     });
+  // }
+
+  const ReceberUserSkills = async () => {
+    api
+      .get(`/api/userSkills`)
+      .then((result) => {
+        setUserSkills(result.data);
+        console.log("TESTE20");
+        ListSkills();
+        // SetDropDown();
+      })
+      .catch((error) => {
+        console.log("Erro ao carregar2 " + JSON.stringify(error));
+      });
+  };
 
   function PostarUserSkills() {
     api
       .post(`/api/userSkills`, dadosUser)
-      .then((result) => {
-      })
+      .then((result) => {})
       .catch((error) => {
         console.log("Erro ao carregar " + JSON.stringify(error));
       });
@@ -81,27 +140,28 @@ export const Home = () => {
     imageUrl: imagem,
   };
 
-  let dadosUser= {
+  let dadosUser = {
     user: usuarioCON,
     skill: skillID,
     knowledgeLevel: nivelConhecimento,
     updateAlt: today,
     createdAt: today,
-  }
+  };
 
-  
   function enviarDados() {
     api.post(`/api/skills`, dadosModal);
     setRender(!render);
+  }
+
+  if (loading) {
+    return <div></div>;
   }
 
   return (
     <>
       <Container>
         <Titulo>
-          <h4 style={{ fontWeight: "bold", color: "#FFFFFF" }}>
-            Área do Desenvolvedor
-          </h4>
+          <h4 style={{ fontWeight: "bold", color: "#FFFFFF" }}>Suas Skills</h4>
         </Titulo>
         <Sair>
           <a onClick={handleShowModal3}>
@@ -132,44 +192,14 @@ export const Home = () => {
               flexDirection: "row",
               alignItems: "center",
               position: "relative",
-              right: "5vw",
-            }}
-          >
-            <h4 style={{ fontWeight: "bold", color: "#FFFFFF" }}>Skills</h4>
-            <a onClick={handleShowModal}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                class="bi bi-plus-circle"
-                viewBox="0 0 16 16"
-                style={{
-                  color: "#FFFFFF",
-                  position: "relative",
-                  left: "0.5vw",
-                  bottom: "0.8vh",
-                }}
-              >
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-              </svg>
-            </a>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              position: "relative",
-              left: "5vw",
+              left: "0.2vw",
             }}
           >
             <h4 style={{ fontWeight: "bold", color: "#FFFFFF" }}>
               User Skills
             </h4>
             <a onClick={handleShowModal5}>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
                 height="20"
@@ -187,39 +217,21 @@ export const Home = () => {
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
               </svg>
             </a>
-             <a
-              onClick={() => {
-                Direcionamento();
-              }}
-             style={{position: "relative", left: "0.5vw"}}
-             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="21"
-                height="21"
-                fill="currentColor"
-                class="bi bi-person-circle"
-                viewBox="0 0 16 16"
-                style={{
-                  color: "#FFFFFF",
-                  position: "relative",
-                  left: "0.5vw",
-                  bottom: "0.7vh",
-                }}
-              >
-                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                <path
-                  fill-rule="evenodd"
-                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
-                />
-              </svg>
-            </a> 
           </div>
         </SubTitulo>
 
-        {skills?.map((size) => (
+        {listaSkillsUser?.map((size) => (
           <CardHome pulicacao={size} id={size.id} />
-        ))}
+        ))} 
+
+        {/* {userSkills?.map((size) =>
+          listaSkillsUser?.map((sizeList) => (
+            if(size.skill === sizeList.id){
+              <CardHome pulicacao={sizeList} id={size.id} />
+            }
+            
+          ))
+        )} */}
 
         <Modal show={showModal} onHide={handleCloseModal}>
           <Modal.Header
@@ -317,7 +329,6 @@ export const Home = () => {
                     position: "relative",
                     top: "2vh",
                     left: "1vw",
-                    
                   }}
                 >
                   <Dropdown.Toggle
@@ -326,7 +337,6 @@ export const Home = () => {
                       height: "38px",
                       fontWeight: "bold",
                       backgroundColor: "#f0e8e8",
-          
                     }}
                     variant="light"
                     bg="light"
@@ -347,8 +357,8 @@ export const Home = () => {
                     {skills.map((item) => (
                       <Dropdown.Item
                         onClick={() => {
-                        setSkillID(item.id);
-                        console.log("SkillID:" + skillID);
+                          setSkillID(item.id);
+                          console.log("SkillID:" + skillID);
                         }}
                         href="#/action-2"
                       >
@@ -426,8 +436,7 @@ export const Home = () => {
               className="d-flex justify-content-center align-items-center"
               variant="primary"
               onClick={() => {
-                localStorage.removeItem("senha"),
-                navigate("/login")
+                navigate("/login");
               }}
               style={{
                 position: "relative",
@@ -444,11 +453,9 @@ export const Home = () => {
             <Button
               className="d-flex justify-content-center align-items-center"
               variant="primary"
-              onClick={() => {
+              onClick={
                 //enviardados()
                 handleCloseModal3
-                
-              }
               }
               style={{
                 position: "relative",
